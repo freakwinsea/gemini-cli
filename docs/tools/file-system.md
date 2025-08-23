@@ -121,6 +121,10 @@ The Gemini CLI provides a comprehensive suite of tools for interacting with the 
 
   - `new_string` (string, required): The exact literal text to replace `old_string` with.
   - `expected_replacements` (number, optional): The number of occurrences to replace. Defaults to `1`.
+  - `dry_run` (boolean, optional): If `true`, the tool will not write to the file system. Instead, it will return the new content that would have been written. This is useful for previewing changes.
+  - `is_regex` (boolean, optional): When set to `true`, `old_string` is treated as a regular expression. Defaults to `false`.
+  - `start_line` (number, optional): A 1-based line number to restrict the search and replacement to a specific line or the start of a range.
+  - `end_line` (number, optional): A 1-based line number to mark the end of a range for search and replacement.
 
 - **Behavior:**
   - If `old_string` is empty and `file_path` does not exist, creates a new file with `new_string` as content.
@@ -139,5 +143,58 @@ The Gemini CLI provides a comprehensive suite of tools for interacting with the 
   - On success: `Successfully modified file: /path/to/file.txt (1 replacements).` or `Created new file: /path/to/new_file.txt with provided content.`
   - On failure: An error message explaining the reason (e.g., `Failed to edit, 0 occurrences found...`, `Failed to edit, expected 1 occurrences but found 2...`).
 - **Confirmation:** Yes. Shows a diff of the proposed changes and asks for user approval before writing to the file.
+
+### Enhanced `replace` Tool Functionality
+
+The `replace` tool has been upgraded with new features to make it more powerful, precise, and safe to use. Here’s a guide on how to use the new capabilities.
+
+#### 1. Regular Expression Support
+
+You can now use regular expressions to find the text you want to replace. This is useful when you need to match a pattern rather than an exact string, making your replacements more robust against minor variations in whitespace or formatting.
+
+- **New Parameter:** `is_regex: boolean` (optional, defaults to `false`)
+- **Description:** When you set `is_regex: true`, the `old_string` parameter will be treated as a regular expression.
+- **Example:**
+  To replace a Python function definition regardless of its internal spacing, you can use:
+  ```
+  replace(
+    file_path="/path/to/your/file.py",
+    old_string="^\\s*def\\s+my_function\\(a,\\s*b\\):\\s*return\\s+a\\s*\\+\\s*b$",
+    new_string="def my_new_function(a, b):\n    return a * b",
+    is_regex=true
+  )
+  ```
+- **Note:** The regular expression is applied with a global flag (`g`), so it will replace all matches within the search scope (the entire file or the specified line range).
+
+#### 2. Line Number/Range Targeting
+
+You can now restrict your search and replacement to a specific line or a range of lines within a file. This adds a layer of precision and helps prevent unintended replacements in other parts of the file.
+
+- **New Parameters:**
+  - `start_line: number` (optional, 1-based)
+  - `end_line: number` (optional, 1-based)
+- **Description:**
+  - If you provide only `start_line`, the search and replacement will be confined to that single line.
+  - If you provide both `start_line` and `end_line`, the operation will be performed on the inclusive range of lines from `start_line` to `end_line`.
+- **Examples:**
+  - **Targeting a single line:**
+    ```
+    replace(
+      file_path="/path/to/your/file.js",
+      start_line=15,
+      old_string="const oldVar = 10;",
+      new_string="const newVar = 20;"
+    )
+    ```
+  - **Targeting a range of lines:**
+    ```
+    replace(
+      file_path="/path/to/your/file.java",
+      start_line=25,
+      end_line=30,
+      old_string="public void oldMethod()",
+      new_string="public void newMethod()"
+    )
+    ```
 
 These file system tools provide a foundation for the Gemini CLI to understand and interact with your local project context.
