@@ -896,8 +896,7 @@ describe('EditTool', () => {
   describe('Line Number Targeting', () => {
     const testFile = 'line_targeting_test.txt';
     let filePath: string;
-    const initialContent =
-      'line 1: foo\nline 2: bar\nline 3: foo\nline 4: baz';
+    const initialContent = 'line 1: foo\nline 2: bar\nline 3: foo\nline 4: baz';
 
     beforeEach(() => {
       filePath = path.join(rootDir, testFile);

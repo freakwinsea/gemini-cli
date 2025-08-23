@@ -179,7 +179,12 @@ export class TestRig {
   run(
     promptOrOptions:
       | string
-      | { prompt?: string; stdin?: string; stdinDoesNotEnd?: boolean },
+      | {
+          prompt?: string;
+          stdin?: string;
+          stdinDoesNotEnd?: boolean;
+          dryRun?: boolean;
+        },
     ...args: string[]
   ): Promise<string> {
     let command = `node ${this.bundlePath} --yolo`;
@@ -200,6 +205,9 @@ export class TestRig {
     ) {
       if (promptOrOptions.prompt) {
         command += ` --prompt ${JSON.stringify(promptOrOptions.prompt)}`;
+      }
+      if (promptOrOptions.dryRun) {
+        command += ` --dry-run`;
       }
       if (promptOrOptions.stdin) {
         execOptions.input = promptOrOptions.stdin;

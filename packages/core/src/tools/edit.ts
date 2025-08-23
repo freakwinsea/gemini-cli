@@ -181,13 +181,8 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
       };
     } else if (currentContent !== null) {
       if (params.start_line !== undefined) {
-        const {
-          old_string,
-          new_string,
-          start_line,
-          end_line,
-          is_regex,
-        } = params;
+        const { old_string, new_string, start_line, end_line, is_regex } =
+          params;
         const lines = currentContent.split('\n');
         const endLine = end_line ?? start_line!;
         if (
@@ -329,7 +324,7 @@ class EditToolInvocation implements ToolInvocation<EditToolParams, ToolResult> {
           isNewFile,
           isRegex,
         )
-      : currentContent ?? '';
+      : (currentContent ?? '');
 
     if (!error && fileExists && currentContent === newContent) {
       error = {
@@ -619,8 +614,7 @@ Expectation for required parameters:
             type: 'string',
           },
           is_regex: {
-            description:
-              'Whether to treat old_string as a regular expression.',
+            description: 'Whether to treat old_string as a regular expression.',
             type: 'boolean',
           },
           start_line: {
@@ -632,8 +626,7 @@ Expectation for required parameters:
             type: 'number',
           },
           dry_run: {
-            description:
-              'If true, the tool will not write to the file system.',
+            description: 'If true, the tool will not write to the file system.',
             type: 'boolean',
           },
           expected_replacements: {

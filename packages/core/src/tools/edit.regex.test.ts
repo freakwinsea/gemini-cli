@@ -1,3 +1,9 @@
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { EditTool } from './edit.js';
 import { Config } from '../config/config.js';
@@ -9,6 +15,7 @@ vi.mock('../telemetry/loggers.js', () => ({
 
 describe('EditTool with Regex', () => {
   let config: Config;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let fs: any;
 
   beforeEach(() => {
