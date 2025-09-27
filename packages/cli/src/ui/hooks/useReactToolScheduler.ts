@@ -19,6 +19,7 @@ import type {
   ToolCall,
   Status as CoreStatus,
   EditorType,
+  ToolExecutor,
 } from '@google/gemini-cli-core';
 import { CoreToolScheduler } from '@google/gemini-cli-core';
 import { useCallback, useState, useMemo } from 'react';
@@ -67,6 +68,7 @@ export function useReactToolScheduler(
   config: Config,
   getPreferredEditor: () => EditorType | undefined,
   onEditorClose: () => void,
+  toolExecutor?: ToolExecutor,
 ): [TrackedToolCall[], ScheduleFn, MarkToolsAsSubmittedFn] {
   const [toolCallsForDisplay, setToolCallsForDisplay] = useState<
     TrackedToolCall[]
@@ -139,8 +141,8 @@ export function useReactToolScheduler(
         getPreferredEditor,
         config,
         onEditorClose,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any),
+        toolExecutor,
+      }),
     [
       config,
       outputUpdateHandler,
@@ -148,6 +150,7 @@ export function useReactToolScheduler(
       toolCallsUpdateHandler,
       getPreferredEditor,
       onEditorClose,
+      toolExecutor,
     ],
   );
 
