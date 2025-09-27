@@ -47,27 +47,39 @@ function normalizeArgs(args: unknown) {
 
   // If the model passed a JSON string, parse it.
   if (typeof obj === 'string') {
-    try { obj = JSON.parse(obj); } catch { /* keep as string */ }
+    try {
+      obj = JSON.parse(obj);
+    } catch {
+      // keep as string
+    }
   }
 
   if (!obj || typeof obj !== 'object') return {};
 
-  // Prefer the nested payload if present (both spellings observed).
-  const src: any =
-    ('arguments' in (obj as any) && typeof (obj as any).arguments === 'object')
-      ? (obj as any).arguments
-      : ('args' in (obj as any) && typeof (obj as any).args === 'object')
-      ? (obj as any).args
-      : obj;
-
-  const cleaned: Record<string, unknown> = {};
-  const shouldStrip = looksLikeEnvelope(src);
-  for (const [k, v] of Object.entries(src)) {
-    if (shouldStrip && STRIP_KEYS.has(k)) continue;
-    cleaned[k] = v;
+  // Check for nested arguments first. If found, we assume this is the source of truth.
+  if ('arguments' in (obj as any) && typeof (obj as any).arguments === 'object') {
+    return (obj as any).arguments;
   }
-  return cleaned;
+  if ('args' in (obj as any) && typeof (obj as any).args === 'object') {
+    return (obj as any).args;
+  }
+
+  // If no nested arguments, we're at the top level.
+  // Check if this top-level object looks like an envelope that needs cleaning.
+  if (looksLikeEnvelope(obj)) {
+      const cleaned: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(obj)) {
+          if (!STRIP_KEYS.has(k)) {
+              cleaned[k] = v;
+          }
+      }
+      return cleaned;
+  }
+
+  // If it's not nested and doesn't look like an envelope, return it as is.
+  return obj;
 }
+
 
 export type McpResponse = {
   is_error?: boolean;
