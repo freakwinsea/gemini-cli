@@ -8,7 +8,6 @@ import type { Config, ToolCallRequestInfo } from '@google/gemini-cli-core';
 import { isSlashCommand } from './ui/utils/commandUtils.js';
 import type { LoadedSettings } from './config/settings.js';
 import {
-  executeToolCall,
   shutdownTelemetry,
   isTelemetrySdkInitialized,
   GeminiEventType,
@@ -30,6 +29,7 @@ import {
   handleCancellationError,
   handleMaxTurnsExceededError,
 } from './utils/errors.js';
+import { callMCP, toFunctionResponsePart } from './mcp.js';
 
 export async function runNonInteractive(
   config: Config,
@@ -133,29 +133,35 @@ export async function runNonInteractive(
         if (toolCallRequests.length > 0) {
           const toolResponseParts: Part[] = [];
           for (const requestInfo of toolCallRequests) {
-            const toolResponse = await executeToolCall(
-              config,
-              requestInfo,
-              abortController.signal,
-            );
-
-            if (toolResponse.error) {
+            try {
+              const mcp = await callMCP(requestInfo.name, requestInfo.args);
+              const toolPart = toFunctionResponsePart(
+                requestInfo.name,
+                mcp,
+                requestInfo.callId,
+              );
+              toolResponseParts.push(toolPart);
+            } catch (error) {
               handleToolError(
                 requestInfo.name,
-                toolResponse.error,
+                error as Error,
                 config,
-                toolResponse.errorType || 'TOOL_EXECUTION_ERROR',
-                typeof toolResponse.resultDisplay === 'string'
-                  ? toolResponse.resultDisplay
-                  : undefined,
+                'TOOL_EXECUTION_ERROR',
               );
-            }
-
-            if (toolResponse.responseParts) {
-              toolResponseParts.push(...toolResponse.responseParts);
+              // Ensure Gemini receives a functionResponse for this callId
+              toolResponseParts.push({
+                functionResponse: {
+                  id: requestInfo.callId,
+                  name: requestInfo.name,
+                  response: {
+                    ok: false,
+                    error: (error as Error)?.message ?? 'MCP tool failed',
+                  },
+                },
+              });
             }
           }
-          currentMessages = [{ role: 'user', parts: toolResponseParts }];
+          currentMessages = [{ role: 'tool', parts: toolResponseParts }];
         } else {
           if (config.getOutputFormat() === OutputFormat.JSON) {
             const formatter = new JsonFormatter();

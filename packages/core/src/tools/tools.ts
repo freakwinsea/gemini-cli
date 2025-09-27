@@ -671,3 +671,24 @@ export interface ToolLocation {
   // Which line (if known)
   line?: number;
 }
+
+export interface ToolCallRequestInfo {
+  callId: string;
+  name: string;
+  args: Record<string, unknown>;
+  isClientInitiated: boolean;
+  prompt_id: string;
+}
+
+export type FunctionResponsePart = {
+  functionResponse: {
+    id?: string; // correlation id for the tool call
+    name: string;
+    response: Record<string, unknown>;
+  };
+};
+
+export type ToolExecutor = (
+  req: ToolCallRequestInfo,
+  signal: AbortSignal,
+) => Promise<FunctionResponsePart>;

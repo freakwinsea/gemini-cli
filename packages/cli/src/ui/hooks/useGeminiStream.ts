@@ -16,7 +16,9 @@ import type {
   ThoughtSummary,
   ToolCallRequestInfo,
   GeminiErrorEventValue,
+  ToolExecutor,
 } from '@google/gemini-cli-core';
+import { callMCP, toFunctionResponsePart } from '../../mcp.js';
 import {
   GeminiEventType as ServerGeminiEventType,
   getErrorMessage,
@@ -124,6 +126,11 @@ export const useGeminiStream = (
     return new GitService(config.getProjectRoot(), storage);
   }, [config, storage]);
 
+  const mcpExecutor: ToolExecutor = async (req, signal) => {
+    const mcp = await callMCP(req.name, req.args, undefined, signal);
+    return toFunctionResponsePart(req.name, mcp, req.callId);
+  };
+
   const [toolCalls, scheduleToolCalls, markToolsAsSubmitted] =
     useReactToolScheduler(
       async (completedToolCallsFromScheduler) => {
@@ -146,6 +153,7 @@ export const useGeminiStream = (
       config,
       getPreferredEditor,
       onEditorClose,
+      mcpExecutor,
     );
 
   const pendingToolCallGroupDisplay = useMemo(
