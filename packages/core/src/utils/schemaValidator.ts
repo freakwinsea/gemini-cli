@@ -25,6 +25,11 @@ const ajValidator = new AjvClass(
 const addFormatsFunc = (addFormats as any).default || addFormats;
 addFormatsFunc(ajValidator);
 
+// Some of the dynamically-loaded tools from MCP servers have a "name"
+// property on their parameters. This is not a standard JSON schema keyword, so
+// we need to add it as a custom keyword to avoid "strict mode" errors.
+ajValidator.addKeyword('name');
+
 /**
  * Simple utility to validate objects against JSON Schemas
  */
