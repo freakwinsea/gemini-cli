@@ -19,16 +19,12 @@ const ajValidator = new AjvClass(
     // allows use of non-standard or custom formats (the unknown format value
     // will be logged but the schema will still be considered valid).
     strictSchema: false,
+    strict: false,
   },
 );
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const addFormatsFunc = (addFormats as any).default || addFormats;
 addFormatsFunc(ajValidator);
-
-// Some of the dynamically-loaded tools from MCP servers have a "name"
-// property on their parameters. This is not a standard JSON schema keyword, so
-// we need to add it as a custom keyword to avoid "strict mode" errors.
-ajValidator.addKeyword('name');
 
 /**
  * Simple utility to validate objects against JSON Schemas
