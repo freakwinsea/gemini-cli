@@ -251,6 +251,14 @@ export class DiscoveredMCPTool extends BaseDeclarativeTool<
       this.cliConfig,
     );
   }
+
+  /**
+   * MCP tools have their own validation on the server side, so we can
+   * skip client-side validation.
+   */
+  override validateToolParams(): string | null {
+    return null;
+  }
 }
 
 function transformTextBlock(block: McpTextBlock): Part {

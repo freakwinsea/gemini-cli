@@ -19,7 +19,6 @@ const ajValidator = new AjvClass(
     // allows use of non-standard or custom formats (the unknown format value
     // will be logged but the schema will still be considered valid).
     strictSchema: false,
-    strict: false,
   },
 );
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
